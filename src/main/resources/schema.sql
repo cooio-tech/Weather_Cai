@@ -1,0 +1,31 @@
+CREATE DATABASE IF NOT EXISTS weather_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE weather_db;
+
+CREATE TABLE IF NOT EXISTS city (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    city_id VARCHAR(32) NOT NULL UNIQUE,
+    name VARCHAR(64) NOT NULL,
+    adm1 VARCHAR(64),
+    adm2 VARCHAR(64),
+    country VARCHAR(32),
+    lat DOUBLE,
+    lon DOUBLE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS weather_cache (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    city_id VARCHAR(32) NOT NULL,
+    cache_type VARCHAR(32) NOT NULL,
+    json_data TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    UNIQUE KEY uk_city_type (city_id, cache_type)
+);
+
+CREATE TABLE IF NOT EXISTS search_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    city_name VARCHAR(64) NOT NULL,
+    city_id VARCHAR(32) NOT NULL,
+    searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

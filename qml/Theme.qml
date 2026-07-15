@@ -5,8 +5,10 @@ QtObject {
     id: theme
 
     readonly property bool isDark: settingsManager.darkTheme
+    readonly property string weatherMood: (typeof weatherController !== "undefined" && weatherController.animationType)
+                                         ? weatherController.animationType : "sunny"
 
-    readonly property color background: isDark ? "#1a1a2e" : "#e8f4f8"
+    readonly property color background: ambienceBase
     readonly property color surface: isDark ? "#16213e" : "#ffffff"
     readonly property color primary: isDark ? "#0f3460" : "#2196F3"
     readonly property color accent: isDark ? "#89b4d4" : "#FF5722"
@@ -23,6 +25,47 @@ QtObject {
     readonly property color chartPrecip: isDark ? "#5a8ab0" : "#2196F3"
     readonly property color border: isDark ? "#2a3a5c" : "#e0e0e0"
     readonly property color shadow: isDark ? "#00000040" : "#00000020"
+    readonly property color selectedDay: isDark ? "#5a8ec4" : "#42a5f5"
+    readonly property color popupBg: isDark ? "#1a2744" : "#ffffff"
+
+    readonly property color ambienceBase: {
+        if (isDark) {
+            if (weatherMood === "rain") return "#141c2e"
+            if (weatherMood === "snow") return "#161d28"
+            if (weatherMood === "cloudy") return "#171e2c"
+            return "#1a1a2e"
+        }
+        if (weatherMood === "rain") return "#dce8f2"
+        if (weatherMood === "snow") return "#e8eef4"
+        if (weatherMood === "cloudy") return "#e4ecf0"
+        return "#e8f4f8"
+    }
+
+    readonly property color ambienceTop: {
+        if (isDark) {
+            if (weatherMood === "rain") return "#1a2740"
+            if (weatherMood === "snow") return "#1c2836"
+            if (weatherMood === "cloudy") return "#1c2436"
+            return "#252045"
+        }
+        if (weatherMood === "rain") return "#c5daf0"
+        if (weatherMood === "snow") return "#d9e6f2"
+        if (weatherMood === "cloudy") return "#d5e2ea"
+        return "#cfe8f5"
+    }
+
+    readonly property color ambienceAccent: {
+        if (isDark) {
+            if (weatherMood === "rain") return "#2a4a6a"
+            if (weatherMood === "snow") return "#3a5060"
+            if (weatherMood === "cloudy") return "#3a4558"
+            return "#3d3560"
+        }
+        if (weatherMood === "rain") return "#9ec0e0"
+        if (weatherMood === "snow") return "#b8cddc"
+        if (weatherMood === "cloudy") return "#b0c4c8"
+        return "#ffe0b2"
+    }
 
     function aqiColor(aqi) {
         var val = parseInt(aqi) || 0

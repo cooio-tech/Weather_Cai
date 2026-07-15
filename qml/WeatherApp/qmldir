@@ -5,7 +5,9 @@ WeatherDisplay 1.0 WeatherDisplay.qml
 WeatherAnimations 1.0 WeatherAnimations.qml
 AqiCard 1.0 AqiCard.qml
 ChartsView 1.0 ChartsView.qml
+WeatherIcon 1.0 WeatherIcon.qml
 HourlyTimeline 1.0 HourlyTimeline.qml
 TripGoPanel 1.0 TripGoPanel.qml
 SettingsPanel 1.0 SettingsPanel.qml
+AmbientBackground 1.0 AmbientBackground.qml
 MapView 1.0 MapView.qml

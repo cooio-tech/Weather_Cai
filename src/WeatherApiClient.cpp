@@ -32,6 +32,19 @@ void WeatherApiClient::fetchWeather(const QString &city)
     connect(reply, &QNetworkReply::finished, this, &WeatherApiClient::onReplyFinished);
 }
 
+void WeatherApiClient::fetchCitySearch(const QString &city)
+{
+    QUrl url(m_baseUrl + "/api/weather/search");
+    QUrlQuery query;
+    query.addQueryItem("city", city);
+    url.setQuery(query);
+
+    QNetworkRequest request(url);
+    QNetworkReply *reply = m_manager->get(request);
+    reply->setProperty("requestType", "citysearch");
+    connect(reply, &QNetworkReply::finished, this, &WeatherApiClient::onReplyFinished);
+}
+
 void WeatherApiClient::fetchBrief(const QStringList &cities)
 {
     if (cities.isEmpty()) {
@@ -99,6 +112,8 @@ void WeatherApiClient::onReplyFinished()
         if (type == "map") {
             qWarning() << "[map] network error:" << reply->errorString();
             emit mapImageFailed();
+        } else if (type == "citysearch") {
+            emit citySearchReceived({});
         } else {
             emit errorOccurred(QString::fromUtf8("\xe7\xbd\x91\xe7\xbb\x9c\xe8\xaf\xb7\xe6\xb1\x82\xe5\xa4\xb1\xe8\xb4\xa5: %1").arg(reply->errorString()));
         }
@@ -112,10 +127,32 @@ void WeatherApiClient::onReplyFinished()
         handleTripGoReply(reply);
     } else if (type == "map") {
         handleMapReply(reply);
+    } else if (type == "citysearch") {
+        handleCitySearchReply(reply);
     } else {
         handleWeatherReply(reply);
     }
     reply->deleteLater();
+}
+
+void WeatherApiClient::handleCitySearchReply(QNetworkReply *reply)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    QJsonObject root = doc.object();
+    QVariantList items;
+    if (root.value("code").toInt() == 200) {
+        for (const QJsonValue &val : root.value("data").toArray()) {
+            QJsonObject o = val.toObject();
+            QVariantMap m;
+            m["id"] = o.value("id").toString();
+            m["name"] = o.value("name").toString();
+            m["adm1"] = o.value("adm1").toString();
+            m["adm2"] = o.value("adm2").toString();
+            m["country"] = o.value("country").toString();
+            items.append(m);
+        }
+    }
+    emit citySearchReceived(items);
 }
 
 void WeatherApiClient::handleWeatherReply(QNetworkReply *reply)
