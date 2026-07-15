@@ -11,9 +11,11 @@
         <file alias="WeatherAnimations.qml">qml/components/WeatherAnimations.qml</file>
         <file alias="AqiCard.qml">qml/components/AqiCard.qml</file>
         <file alias="ChartsView.qml">qml/components/ChartsView.qml</file>
+        <file alias="WeatherIcon.qml">qml/components/WeatherIcon.qml</file>
         <file alias="HourlyTimeline.qml">qml/components/HourlyTimeline.qml</file>
         <file alias="TripGoPanel.qml">qml/components/TripGoPanel.qml</file>
         <file alias="SettingsPanel.qml">qml/components/SettingsPanel.qml</file>
+        <file alias="AmbientBackground.qml">qml/components/AmbientBackground.qml</file>
         <file alias="MapView.qml">qml/components/MapView.qml</file>
     </qresource>
 </RCC>

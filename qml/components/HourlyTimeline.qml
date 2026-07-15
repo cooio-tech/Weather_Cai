@@ -13,6 +13,25 @@ Rectangle {
     property var hourlyData: weatherController.hourlyForecast
     property bool hasData: hourlyData && hourlyData.length > 0
     readonly property int colWidth: 56
+    property real animProgress: 0
+
+    NumberAnimation {
+        id: hourlyAnim
+        target: hourlyRoot
+        property: "animProgress"
+        from: 0
+        to: 1
+        duration: settingsManager.animationsEnabled ? 1600 : 1
+        easing.type: Easing.OutQuad
+    }
+
+    onAnimProgressChanged: if (hourlyCanvas) hourlyCanvas.requestPaint()
+
+    function replayAnim() {
+        hourlyAnim.stop()
+        animProgress = 0
+        hourlyAnim.start()
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -101,11 +120,25 @@ Rectangle {
                             Item {
                                 width: hourlyRoot.colWidth
                                 height: 24
-                                Text {
+                                Rectangle {
                                     anchors.centerIn: parent
-                                    text: hourlyRoot.iconGlyph(hourlyData[index].icon)
-                                    font.pixelSize: 15
-                                    color: Theme.textPrimary
+                                    width: 22
+                                    height: 22
+                                    radius: 6
+                                    color: weatherController.selectedHourIndex === index
+                                           ? (Theme.isDark ? "#335a8ec4" : "#3342a5f5")
+                                           : "transparent"
+                                }
+                                WeatherIcon {
+                                    anchors.centerIn: parent
+                                    width: 18
+                                    height: 18
+                                    iconCode: hourlyData[index].icon || ""
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: weatherController.setSelectedHourIndex(index)
                                 }
                             }
                         }
@@ -142,12 +175,18 @@ Rectangle {
 
     Connections {
         target: weatherController
-        function onWeatherChanged() { hourlyCanvas.requestPaint() }
+        function onWeatherChanged() { hourlyRoot.replayAnim() }
+        function onSelectionChanged() { if (hourlyCanvas) hourlyCanvas.requestPaint() }
     }
 
     Connections {
         target: settingsManager
         function onDarkThemeChanged() { hourlyCanvas.requestPaint() }
+    }
+
+    Component.onCompleted: {
+        if (hasData) replayAnim()
+        else animProgress = 1
     }
 
     function chartColor(c) {
@@ -157,17 +196,6 @@ Rectangle {
     function formatHour(fxTime) {
         if (!fxTime || fxTime.length < 16) return fxTime || ""
         return fxTime.substring(11, 16)
-    }
-
-    function iconGlyph(icon) {
-        var code = parseInt(icon)
-        if (isNaN(code)) return "\u2601"
-        if (code >= 400 && code <= 499) return "\u2744"
-        if (code >= 300 && code <= 399) return "\u2602"
-        if (code >= 150 && code <= 199) return "\u2601"
-        if (code >= 100 && code <= 103) return "\u2600"
-        if (code >= 104 && code <= 149) return "\u26C5"
-        return "\u2601"
     }
 
     function paintChart(ctx) {
@@ -186,34 +214,59 @@ Rectangle {
         }
         minT = Math.floor(minT - 1); maxT = Math.ceil(maxT + 1)
         if (maxT === minT) maxT = minT + 1
+        var p = Math.max(0, Math.min(1, hourlyRoot.animProgress))
 
+        // Precipitation probability bars — staggered grow
         for (var b = 0; b < n; b++) {
             var pop = hourlyData[b].pop || 0
+            var staggerMax = 0.28
+            var start = (n <= 1) ? 0 : staggerMax * b / (n - 1)
+            var local = Math.max(0, Math.min(1, (p - start) / (1 - staggerMax)))
+            local = local * local * (3 - 2 * local)
             var bx = padL + gap * b + gap * 0.2
             var bw = gap * 0.6
-            var bh = chartH * pop / 100
-            ctx.fillStyle = Theme.isDark ? "rgba(90,138,176,0.35)" : "rgba(33,150,243,0.3)"
-            ctx.fillRect(bx, padT + chartH - bh, bw, bh)
+            var bh = chartH * (pop / 100) * local
+            var r = Math.min(3, bw / 2)
+            var sel = weatherController.selectedHourIndex === b
+            ctx.fillStyle = sel
+                    ? (Theme.isDark ? "rgba(90,180,240,0.55)" : "rgba(33,150,243,0.5)")
+                    : (Theme.isDark ? "rgba(90,138,176,0.45)" : "rgba(33,150,243,0.38)")
+            if (bh > 0) {
+                ctx.beginPath()
+                ctx.moveTo(bx, padT + chartH)
+                ctx.lineTo(bx, padT + chartH - bh + r)
+                ctx.quadraticCurveTo(bx, padT + chartH - bh, bx + r, padT + chartH - bh)
+                ctx.lineTo(bx + bw - r, padT + chartH - bh)
+                ctx.quadraticCurveTo(bx + bw, padT + chartH - bh, bx + bw, padT + chartH - bh + r)
+                ctx.lineTo(bx + bw, padT + chartH)
+                ctx.closePath()
+                ctx.fill()
+            }
         }
 
+        ctx.globalAlpha = 0.35 + 0.65 * p
         ctx.strokeStyle = chartColor(Theme.chartWind); ctx.lineWidth = 1.5; ctx.beginPath()
         for (var wj = 0; wj < n; wj++) {
             var wx = padL + gap * wj + gap / 2
-            var wy = padT + chartH * (1 - (hourlyData[wj].windSpeed || 0) / Math.max(maxWind, 1))
+            var wyFull = padT + chartH * (1 - (hourlyData[wj].windSpeed || 0) / Math.max(maxWind, 1))
+            var wy = (padT + chartH) + (wyFull - (padT + chartH)) * p
             if (wj === 0) ctx.moveTo(wx, wy); else ctx.lineTo(wx, wy)
         }
         ctx.stroke()
 
+        ctx.globalAlpha = 1
         ctx.strokeStyle = chartColor(Theme.chartTempMax); ctx.lineWidth = 2; ctx.beginPath()
         var points = []
         for (var j = 0; j < n; j++) {
             var x = padL + gap * j + gap / 2
-            var y = padT + chartH * (1 - (hourlyData[j].temp - minT) / (maxT - minT))
+            var yFull = padT + chartH * (1 - (hourlyData[j].temp - minT) / (maxT - minT))
+            var y = (padT + chartH) + (yFull - (padT + chartH)) * p
             points.push({ x: x, y: y, temp: hourlyData[j].temp })
             if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
         }
         ctx.stroke()
 
+        ctx.globalAlpha = p
         ctx.fillStyle = Theme.isDark ? "#f0f0f0" : "#212121"
         ctx.font = "bold 11px sans-serif"
         ctx.textAlign = "center"
@@ -231,5 +284,6 @@ Rectangle {
             ctx.arc(points[d].x, points[d].y, 2.5, 0, Math.PI * 2)
             ctx.fill()
         }
+        ctx.globalAlpha = 1
     }
 }

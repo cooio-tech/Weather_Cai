@@ -11,9 +11,26 @@ ApplicationWindow {
     title: "\u5929\u6c14\u67e5\u8be2\u7cfb\u7edf"
     color: Theme.background
 
+    Behavior on color { ColorAnimation { duration: settingsManager.animationsEnabled ? 600 : 0 } }
+
+    AmbientBackground { anchors.fill: parent }
+
+    Timer {
+        id: refreshTimer
+        interval: Math.max(1, settingsManager.refreshIntervalMin) * 60 * 1000
+        repeat: true
+        running: settingsManager.refreshIntervalMin > 0
+                 && weatherController.cityName.length > 0
+        onTriggered: weatherController.refreshWeather()
+    }
+
     Connections {
         target: settingsManager
         function onCacheCleared() { weatherController.clearAllCache() }
+        function onRefreshIntervalChanged() {
+            refreshTimer.interval = Math.max(1, settingsManager.refreshIntervalMin) * 60 * 1000
+            refreshTimer.restart()
+        }
     }
 
     Connections {
@@ -47,14 +64,14 @@ ApplicationWindow {
 
             WeatherDisplay {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 255
-                Layout.minimumHeight: 235
+                Layout.preferredHeight: 258
+                Layout.minimumHeight: 238
             }
 
             HourlyTimeline {
                 Layout.fillWidth: true
-                Layout.preferredHeight: expanded ? 170 : 36
-                Layout.maximumHeight: expanded ? 170 : 36
+                Layout.preferredHeight: expanded ? 168 : 36
+                Layout.maximumHeight: expanded ? 168 : 36
             }
 
             ColumnLayout {

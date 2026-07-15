@@ -1,0 +1,35 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  tomcat:
+    uri-encoding: UTF-8
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/weather_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 888
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+qweather:
+  api-key: a2393d977371410e9f5304a590bc097f
+  api-host: https://n76apyt3p5.re.qweatherapi.com
+
+weather:
+  cache-ttl-minutes: 30
+
+
+amap:
+  api-key: 4ccdede83704ad8f760f4c9c0bbfd9f7
