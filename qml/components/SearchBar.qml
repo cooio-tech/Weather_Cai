@@ -1,24 +1,23 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import WeatherApp
+//import WeatherApp
 
 Item {
     id: searchBar
     height: 56
     z: 50
     signal searchRequested(string city)
-    property bool suppressPopup: false
+    property bool suppressPopup: false   //联想框开关
 
     function doSearch(city) {
         var name = (city || "").trim()
         if (!name.length) return
-        // collapse suggestions immediately after pick/search
         searchBar.suppressPopup = true
         suggestTimer.stop()
         weatherController.clearSuggestions()
         popup.close()
-        cityInput.focus = false
+        cityInput.focus = false  //输入框失焦
         settingsManager.addRecentCity(name)
         searchBar.searchRequested(name)
     }
@@ -78,6 +77,7 @@ Item {
         }
     }
 
+    //防抖Timer
     Timer {
         id: suggestTimer
         interval: 280

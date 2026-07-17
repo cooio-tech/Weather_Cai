@@ -28,7 +28,7 @@ Window {
         }
     }
     function baseColor() {
-        // Slightly less transparent (~42%)
+        // 略不透明（约 42%）
         if (Theme.isDark) {
             if (weatherType === "rain") return "#6a152028"
             if (weatherType === "snow") return "#6a182024"
@@ -75,7 +75,7 @@ Window {
             anchors.fill: parent
             z: 0
 
-            // Sunny — slow rotation (kept inside rounded card)
+            // 晴天：缓慢旋转（限制在圆角卡片内）
             Item {
                 id: sunnyLayer
                 anchors.fill: parent
@@ -122,7 +122,7 @@ Window {
                 }
             }
 
-            // Cloudy — simple soft cloud (post "好看一点" cleanup)
+            // 多云：简单柔和云朵
             Item {
                 id: cloudyLayer
                 anchors.fill: parent
@@ -174,7 +174,7 @@ Window {
                 }
             }
 
-            // Rain — soft fall
+            // 雨：柔和下落
             Item {
                 anchors.fill: parent
                 visible: widgetWin.weatherType === "rain"
@@ -211,7 +211,7 @@ Window {
                 }
             }
 
-            // Snow — soft float
+            // 雪：轻柔飘落
             Item {
                 anchors.fill: parent
                 visible: widgetWin.weatherType === "snow"
@@ -371,7 +371,7 @@ Window {
             onDoubleClicked: desktopManager.showMainWindow()
         }
 
-        // Bottom-right resize grip
+        // 右下角缩放手柄
         Item {
             id: resizeHandle
             anchors.right: parent.right

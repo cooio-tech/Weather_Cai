@@ -286,6 +286,7 @@ Rectangle {
         return chartColor(Theme.isDark ? "#f0f0f0" : "#212121")
     }
 
+    //Canvas 画最高/最低温折线
     function paintTempChart(ctx) {
         ctx.clearRect(0, 0, tempCanvas.width, tempCanvas.height)
         if (!dailyData || dailyData.length === 0) return
@@ -317,7 +318,7 @@ Rectangle {
             minPoints.push({ x: x, y: yBase + (yMinFull - yBase) * p, val: dailyData[j].tempMin })
         }
 
-        // Area between max/min lines
+        // 最高/最低温之间的填充区域
         if (maxPoints.length > 1) {
             ctx.beginPath()
             ctx.moveTo(maxPoints[0].x, maxPoints[0].y)
@@ -332,8 +333,8 @@ Rectangle {
             ctx.globalAlpha = 1
         }
 
-        // Highlight selected / hovered day
-        var hi = chartsRoot.activeDay
+        // 高亮选中或悬停的日期
+        var hi = chartsRoot.activeDay  //悬停优先，否则用选中日，用来高亮
         if (hi >= 0 && hi < n) {
             var hx = maxPoints[hi].x
             ctx.strokeStyle = chartColor(Theme.selectedDay)
@@ -390,6 +391,7 @@ Rectangle {
         ctx.globalAlpha = 1
     }
 
+    //湿度图
     function paintHumidityChart(ctx) {
         ctx.clearRect(0, 0, humidityCanvas.width, humidityCanvas.height)
         if (!dailyData || dailyData.length === 0) return

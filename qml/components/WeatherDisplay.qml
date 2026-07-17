@@ -17,7 +17,6 @@ Rectangle {
                                          && dayIdx < weatherController.dailyForecast.length
     readonly property var dayInfo: showingDay ? weatherController.dailyForecast[dayIdx] : null
 
-    // Soft left sheen tied to weather mood
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {

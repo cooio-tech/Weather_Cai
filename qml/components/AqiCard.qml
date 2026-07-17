@@ -79,7 +79,6 @@ Rectangle {
     function aqiNumeric(v) {
         var n = parseFloat(v)
         if (isNaN(n)) return 0
-        if (n > 0 && n <= 15) n = n * 20
         return Math.max(0, Math.min(aqiCard.aqiMax, n))
     }
 
@@ -189,7 +188,7 @@ Rectangle {
                 }
             }
 
-            // Current value centered in the horseshoe hole
+            // 当前数值居中显示在马蹄形仪表空心处
             Column {
                 id: centerReadout
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -219,8 +218,11 @@ Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: {
                         if (!aqiCard.hasData) return "\u641c\u7d22\u57ce\u5e02\u540e\u663e\u793a"
-                        if (aqiCard.mode === "aqi")
-                            return aqiCard.category || Theme.aqiLabel(aqiCard.aqi) || ""
+                        if (aqiCard.mode === "aqi") {
+                            // 用当前显示数值推导等级文案，保证数字与类别一致
+                            var fromValue = Theme.aqiLabel(aqiCard.aqiNumeric(aqiCard.aqi))
+                            return fromValue || aqiCard.category || ""
+                        }
                         return weatherController.uvLevel ? ("Lv." + weatherController.uvLevel) : ""
                     }
                     font.pixelSize: aqiCard.hasData ? 13 : 10
@@ -245,7 +247,6 @@ Rectangle {
         ctx.clearRect(0, 0, w, h)
 
         var cx = w / 2
-        // Same diameter feel, thicker stroke
         var cy = h * 0.54
         var outer = Math.min(w, h) * 0.46
         var thickness = Math.max(24, outer * 0.38)
@@ -264,7 +265,6 @@ Rectangle {
             return
         }
 
-        // Dim track
         ctx.beginPath()
         ctx.arc(cx, cy, midR, start, start + sweep)
         ctx.strokeStyle = Theme.isDark ? "rgba(255,255,255,0.10)" : "rgba(15,23,42,0.07)"
@@ -272,7 +272,6 @@ Rectangle {
         ctx.lineCap = "round"
         ctx.stroke()
 
-        // Colored arc
         var steps = 48
         var drawSweep = sweep * p
         for (var i = 0; i < steps; i++) {
@@ -290,7 +289,6 @@ Rectangle {
             ctx.stroke()
         }
 
-        // Scale ticks + labels laid out along the ring (arc)
         var ticks = (aqiCard.mode === "aqi") ? [0, 100, 200, 300, 500] : [1, 2, 3, 4, 5]
         var maxV = (aqiCard.mode === "aqi") ? aqiCard.aqiMax : 5
         ctx.font = "bold 9px sans-serif"
@@ -302,7 +300,6 @@ Rectangle {
             var lx = cx + Math.cos(ang) * midR
             var ly = cy + Math.sin(ang) * midR
 
-            // subtle tick on the ring
             var ir = midR - thickness * 0.28
             var or = midR + thickness * 0.28
             ctx.beginPath()
@@ -313,7 +310,6 @@ Rectangle {
             ctx.lineCap = "butt"
             ctx.stroke()
 
-            // number sits on the ring band
             ctx.lineWidth = 2.5
             ctx.strokeStyle = "rgba(0,0,0,0.35)"
             ctx.fillStyle = "#ffffff"
@@ -321,7 +317,6 @@ Rectangle {
             ctx.fillText(String(ticks[k]), lx, ly)
         }
 
-        // Thumb at current value (drawn after labels so it stays on top)
         var value = (aqiCard.mode === "aqi") ? aqiCard.aqiNumeric(aqiCard.aqi) : aqiCard.uvNumeric()
         var vt = Math.max(0, Math.min(1, value / maxV)) * p
         var na = start + sweep * vt

@@ -85,7 +85,7 @@ Rectangle {
                 Button {
                     text: "\u663e\u793a/\u9690\u85cf\u684c\u9762\u5c0f\u7ec4\u4ef6"
                     Layout.fillWidth: true
-                    onClicked: desktopManager.toggleWidget()
+                    onClicked: desktopManager.toggleWidget()  //桌面小组件
                 }
             }
 
@@ -104,7 +104,7 @@ Rectangle {
                     Layout.fillWidth: true
                 }
                 Repeater {
-                    model: settingsManager.favoriteCities
+                    model: settingsManager.favoriteCities    //收藏
                     delegate: RowLayout {
                         Layout.fillWidth: true
                         spacing: 4

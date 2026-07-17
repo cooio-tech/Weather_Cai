@@ -127,13 +127,13 @@ private slots:
     void onBriefReceived(const QVariantList &items);
     void onCitySearchReceived(const QVariantList &items);
     void onMapImageReceived(const QByteArray &pngData);
-    void onMapImageFailed();
+    void OnMapImageFailed();
     void onError(const QString &message);
 
 private:
     void parseWeatherData(const QJsonObject &data);
-    void requestMapImage();
-    void updateSpeechText();
+    void RequestMapImage();
+    void UpdateSpeechText();
     QString travelAdvice() const;
     static QString mapIconToAnimation(const QString &icon);
     static QString getAqiColor(const QString &aqi);

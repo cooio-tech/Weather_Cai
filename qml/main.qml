@@ -15,6 +15,7 @@ ApplicationWindow {
 
     AmbientBackground { anchors.fill: parent }
 
+    //定时刷新
     Timer {
         id: refreshTimer
         interval: Math.max(1, settingsManager.refreshIntervalMin) * 60 * 1000

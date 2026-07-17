@@ -9,7 +9,7 @@ Rectangle {
     color: Theme.surface
     border.color: Theme.border
     border.width: 1
-    property bool expanded: true
+    property bool expanded: true  //展开（true）和折叠
     property var hourlyData: weatherController.hourlyForecast
     property bool hasData: hourlyData && hourlyData.length > 0
     readonly property int colWidth: 56
@@ -129,6 +129,7 @@ Rectangle {
                                            ? (Theme.isDark ? "#335a8ec4" : "#3342a5f5")
                                            : "transparent"
                                 }
+                                //底部图标
                                 WeatherIcon {
                                     anchors.centerIn: parent
                                     width: 18
@@ -216,7 +217,7 @@ Rectangle {
         if (maxT === minT) maxT = minT + 1
         var p = Math.max(0, Math.min(1, hourlyRoot.animProgress))
 
-        // Precipitation probability bars — staggered grow
+        // 降水概率柱：错开生长动画
         for (var b = 0; b < n; b++) {
             var pop = hourlyData[b].pop || 0
             var staggerMax = 0.28

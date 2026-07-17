@@ -1,5 +1,5 @@
 import QtQuick
-import WeatherApp
+//import WeatherApp
 
 Item {
     id: ambience
@@ -20,7 +20,7 @@ Item {
         Behavior on gradient { enabled: false }
     }
 
-    // Soft glow blob — sunny / warm
+    // 柔和光晕：晴天 / 暖色调
     Rectangle {
         visible: mood === "sunny" || mood === ""
         width: parent.width * 0.55
@@ -40,7 +40,7 @@ Item {
         }
     }
 
-    // Drifting cloud patches
+    // 飘移的云块
     Repeater {
         model: (mood === "cloudy" || mood === "rain" || mood === "snow") ? 3 : 0
         Rectangle {
@@ -64,7 +64,7 @@ Item {
         }
     }
 
-    // Rain streaks
+    // 雨丝
     Repeater {
         model: mood === "rain" ? 18 : 0
         Rectangle {
@@ -89,7 +89,7 @@ Item {
         }
     }
 
-    // Snow flakes
+    // 雪花
     Repeater {
         model: mood === "snow" ? 14 : 0
         Rectangle {

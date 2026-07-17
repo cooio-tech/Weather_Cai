@@ -7,7 +7,7 @@ Item {
     height: 22
     property string iconCode: ""
     property string weatherType: ""
-    // "soft" for charts; "gray" for desktop widget
+    // soft：图表用；gray：桌面小组件用
     property string cloudStyle: "soft"
 
     readonly property string kind: {
@@ -22,10 +22,13 @@ Item {
             return "rain"
         if (code >= 200 && code <= 299)
             return "thunder"
-        if (code >= 100 && code <= 103)
+        // 100/150 晴；101–103/151–153 多云类；104/154 阴
+        if (code === 100 || code === 150)
             return "sunny"
-        if (code >= 104 && code <= 149)
+        if ((code >= 101 && code <= 103) || (code >= 151 && code <= 153))
             return "partly"
+        if (code === 104 || code === 154 || (code >= 104 && code <= 149))
+            return "cloudy"
         if (code >= 500 && code <= 515)
             return "fog"
         return "cloudy"

@@ -32,7 +32,7 @@ WeatherController::WeatherController(QObject *parent)
     connect(m_apiClient, &WeatherApiClient::mapImageReceived,
             this, &WeatherController::onMapImageReceived);
     connect(m_apiClient, &WeatherApiClient::mapImageFailed,
-            this, &WeatherController::onMapImageFailed);
+            this, &WeatherController::OnMapImageFailed);
     connect(m_apiClient, &WeatherApiClient::errorOccurred,
             this, &WeatherController::onError);
 }
@@ -84,28 +84,36 @@ void WeatherController::suggestCities(const QString &keyword)
 
 void WeatherController::clearSuggestions()
 {
-    if (m_citySuggestions.isEmpty()) return;
+    if (m_citySuggestions.isEmpty()) {
+        return;
+    }
     m_citySuggestions.clear();
     emit suggestionsChanged();
 }
 
 void WeatherController::setSelectedDayIndex(int index)
 {
-    if (m_selectedDayIndex == index) return;
+    if (m_selectedDayIndex == index) {
+        return;
+    }
     m_selectedDayIndex = index;
     emit selectionChanged();
 }
 
 void WeatherController::setSelectedHourIndex(int index)
 {
-    if (m_selectedHourIndex == index) return;
+    if (m_selectedHourIndex == index) {
+        return;
+    }
     m_selectedHourIndex = index;
     emit selectionChanged();
 }
 
 void WeatherController::setHoverDayIndex(int index)
 {
-    if (m_hoverDayIndex == index) return;
+    if (m_hoverDayIndex == index) {
+        return;
+    }
     m_hoverDayIndex = index;
     emit selectionChanged();
 }
@@ -129,15 +137,17 @@ void WeatherController::refreshWeather()
 
 void WeatherController::speakWeather(bool enabled)
 {
-    if (!m_tts)
+    if (!m_tts) {
         return;
+    }
     if (!enabled) {
         m_tts->stop();
         return;
     }
-    updateSpeechText();
-    if (m_speechText.isEmpty())
+    UpdateSpeechText();
+    if (m_speechText.isEmpty()) {
         return;
+    }
     m_tts->stop();
     m_tts->say(m_speechText);
     qDebug() << "[speech]" << m_speechText;
@@ -145,8 +155,9 @@ void WeatherController::speakWeather(bool enabled)
 
 void WeatherController::stopSpeaking()
 {
-    if (m_tts)
+    if (m_tts) {
         m_tts->stop();
+    }
 }
 
 void WeatherController::clearLocalCache() { m_cache->clearAll(); }
@@ -168,7 +179,9 @@ void WeatherController::onWeatherReceived(const QJsonObject &data, bool fromCach
 {
     m_fromCache = fromCache;
     parseWeatherData(data);
-    if (!fromCache) m_cache->saveWeather(m_cityName, data);
+    if (!fromCache) {
+        m_cache->saveWeather(m_cityName, data);
+    }
     m_loading = false;
     emit loadingChanged();
     emit weatherChanged();
@@ -195,7 +208,7 @@ void WeatherController::onMapImageReceived(const QByteArray &pngData)
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly)) {
         qWarning() << "[map] cannot write cache file:" << filePath;
-        onMapImageFailed();
+        OnMapImageFailed();
         return;
     }
     file.write(pngData);
@@ -209,7 +222,7 @@ void WeatherController::onMapImageReceived(const QByteArray &pngData)
     emit mapLoadingChanged();
 }
 
-void WeatherController::onMapImageFailed()
+void WeatherController::OnMapImageFailed()
 {
     qWarning() << "[map] load failed";
     m_mapImageSource.clear();
@@ -310,11 +323,11 @@ void WeatherController::parseWeatherData(const QJsonObject &data)
         uvItem["uvIndex"] = day.value("uvIndex").toString();
         m_uvDaily.append(uvItem);
     }
-    updateSpeechText();
-    requestMapImage();
+    UpdateSpeechText();
+    RequestMapImage();
 }
 
-void WeatherController::requestMapImage()
+void WeatherController::RequestMapImage()
 {
     if (qFuzzyIsNull(m_latitude) && qFuzzyIsNull(m_longitude)) {
         m_mapImageSource.clear();
@@ -329,7 +342,7 @@ void WeatherController::requestMapImage()
     m_apiClient->fetchMapImage(m_longitude, m_latitude, m_mapZoom);
 }
 
-void WeatherController::updateSpeechText()
+void WeatherController::UpdateSpeechText()
 {
     if (m_cityName.isEmpty()) {
         m_speechText.clear();
@@ -350,7 +363,6 @@ void WeatherController::updateSpeechText()
                 + QString::fromUtf8("\xe5\xba\xa6\xe3\x80\x82");
     }
 
-    // "{city}。当前{text}，气温{temp}度。" + highLow + travelAdvice
     m_speechText = m_cityName
             + QString::fromUtf8("\xe3\x80\x82\xe5\xbd\x93\xe5\x89\x8d")
             + m_weatherText
@@ -371,44 +383,64 @@ QString WeatherController::travelAdvice() const
         tMin = qRound(day.value(QStringLiteral("tempMin")).toDouble());
     }
 
-    if (m_animationType == QLatin1String("rain"))
+    if (m_animationType == QLatin1String("rain")) {
         return QString::fromUtf8("\xe5\xa4\x96\xe5\x87\xba\xe8\xae\xb0\xe5\xbe\x97\xe5\xb8\xa6\xe4\xbc\x9e\xe3\x80\x82");
-    if (m_animationType == QLatin1String("snow"))
+    }
+    if (m_animationType == QLatin1String("snow")) {
         return QString::fromUtf8("\xe8\xb7\xaf\xe9\x9d\xa2\xe5\x8f\xaf\xe8\x83\xbd\xe6\xbb\x91\xef\xbc\x8c\xe5\x87\xba\xe8\xa1\x8c\xe8\xaf\xb7\xe6\xb3\xa8\xe6\x84\x8f\xe5\xae\x89\xe5\x85\xa8\xe3\x80\x82");
-    if (tMax >= 33)
+    }
+    if (tMax >= 33) {
         return QString::fromUtf8("\xe5\xa4\xa9\xe6\xb0\x94\xe8\xbe\x83\xe7\x83\xad\xef\xbc\x8c\xe6\xb3\xa8\xe6\x84\x8f\xe9\x98\xb2\xe6\x9a\x91\xe8\xa1\xa5\xe6\xb0\xb4\xe3\x80\x82");
-    if (tMin > 0 && tMin <= 8)
+    }
+    if (tMin > 0 && tMin <= 8) {
         return QString::fromUtf8("\xe6\xb8\xa9\xe5\xb7\xae\xe8\xbe\x83\xe5\xa4\xa7\xef\xbc\x8c\xe5\x87\xba\xe8\xa1\x8c\xe8\xae\xb0\xe5\xbe\x97\xe6\xb7\xbb\xe8\xa1\xa3\xe3\x80\x82");
-    if (m_animationType == QLatin1String("sunny"))
+    }
+    if (m_animationType == QLatin1String("sunny")) {
         return QString::fromUtf8("\xe9\x80\x82\xe5\x90\x88\xe7\x9f\xad\xe9\x80\x94\xe5\x87\xba\xe8\xa1\x8c\xef\xbc\x8c\xe8\xae\xb0\xe5\xbe\x97\xe9\x98\xb2\xe6\x99\x92\xe3\x80\x82");
+    }
     return QString::fromUtf8("\xe5\x87\xba\xe8\xa1\x8c\xe8\xaf\xb7\xe5\x85\xb3\xe6\xb3\xa8\xe5\xa4\xa9\xe6\xb0\x94\xe5\x8f\x98\xe5\x8c\x96\xe3\x80\x82");
 }
 
 void WeatherController::mapZoomIn()
 {
-    if (m_mapZoom >= 17)
+    if (m_mapZoom >= 17) {
         return;
+    }
     ++m_mapZoom;
     emit mapZoomChanged();
-    requestMapImage();
+    RequestMapImage();
 }
 
 void WeatherController::mapZoomOut()
 {
-    if (m_mapZoom <= 8)
+    if (m_mapZoom <= 8) {
         return;
+    }
     --m_mapZoom;
     emit mapZoomChanged();
-    requestMapImage();
+    RequestMapImage();
 }
 
 QString WeatherController::mapIconToAnimation(const QString &icon)
 {
-    bool ok; int code = icon.toInt(&ok);
-    if (!ok) return "sunny";
-    if (code >= 400 && code <= 499) return "snow";
-    if (code >= 300 && code <= 399) return "rain";
-    if (code >= 100 && code <= 103) return "sunny";
+    bool ok;
+    int code = icon.toInt(&ok);
+    if (!ok) {
+        return "sunny";
+    }
+    // 和风图标：100/150 晴；101–104/151–154 多云或阴
+    if (code >= 400 && code <= 499) {
+        return "snow";
+    }
+    if (code >= 300 && code <= 399) {
+        return "rain";
+    }
+    if (code == 100 || code == 150) {
+        return "sunny";
+    }
+    if ((code >= 101 && code <= 104) || (code >= 151 && code <= 154)) {
+        return "cloudy";
+    }
     return "cloudy";
 }
 
@@ -416,14 +448,23 @@ QString WeatherController::getAqiColor(const QString &aqiStr)
 {
     bool ok = false;
     double aqi = aqiStr.toDouble(&ok);
-    if (!ok) aqi = 0;
-    // If value looks like QAQI (0-10 scale), stretch for color bands
-    if (aqi > 0 && aqi <= 15)
-        aqi = aqi * 20;
-    if (aqi <= 50) return "#81C784";
-    if (aqi <= 100) return "#FFD54F";
-    if (aqi <= 150) return "#FFB74D";
-    if (aqi <= 200) return "#E57373";
-    if (aqi <= 300) return "#BA68C8";
+    if (!ok) {
+        aqi = 0;
+    }
+    if (aqi <= 50) {
+        return "#81C784";
+    }
+    if (aqi <= 100) {
+        return "#FFD54F";
+    }
+    if (aqi <= 150) {
+        return "#FFB74D";
+    }
+    if (aqi <= 200) {
+        return "#E57373";
+    }
+    if (aqi <= 300) {
+        return "#BA68C8";
+    }
     return "#9575A8";
 }

@@ -125,7 +125,6 @@ Rectangle {
                         elide: Text.ElideRight
                     }
 
-
                     Text {
                         text: modelData.reason
                         font.pixelSize: 10
